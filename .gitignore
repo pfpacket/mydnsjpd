@@ -2,3 +2,4 @@ a.out
 *.o
 *.conf
 !mydns.conf
+mydns_update
