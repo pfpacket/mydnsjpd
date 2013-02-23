@@ -1,0 +1,19 @@
+#
+#       README
+#   mydns.jp updater
+#
+mydns_update is a software which updates mydns.jp DNS record.
+
+INSTALL:
+    Just run make:
+        $ make
+    or to specify Boost directory
+        $ make BOOST_ROOT="your Boost dir"
+
+RUN:
+    $ ./mydns_update -f "your config file"
+    A template of config file (mydns.conf) exists.
+
+Requirements:
+    C++11 compiler
+    Boost C++ libraries
