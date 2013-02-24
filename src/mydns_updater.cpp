@@ -192,8 +192,8 @@ private:
         if (err)
             ::syslog(LOG_ERR, "Error: signal hander: %s", err.message().c_str());
         else if (signum == SIGHUP) try {
-            ::syslog(LOG_INFO, "Reload config: masterID=%s,interval(sec)=%d", opt_.username.c_str(), opt_.interval);
             read_config_file(opt_);
+            ::syslog(LOG_INFO, "Reload config: masterID=%s,interval(sec)=%d", opt_.username.c_str(), opt_.interval);
         } catch (std::exception& e) {
             ::syslog(LOG_ERR, "Exception: signal handler: %s", e.what());
         } else if (signum == SIGINT || signum == SIGTERM) {
