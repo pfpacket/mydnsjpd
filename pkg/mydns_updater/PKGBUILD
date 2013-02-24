@@ -9,20 +9,21 @@ depends=('make' 'gcc>=4.6.0')
 confilcts=()
 install=mydns_updater.install
 
-# linux mailine kernel git repository
-mydns_src_dir="../../../"
+# mydns_update git repo
+mydns_update_git="https://github.com/pfpacket/mydns_update.git"
 # Your Boost C++ libraries' path
 boost_root="/usr"
 
 build()
 {
-    cd $mydns_src_dir
+    git clone "${mydns_update_git}"
+    cd mydns_update/
     make BOOST_ROOT="${boost_root}" rebuild
 }
 
 package()
 {
-    cd $mydns_src_dir
+    cd ${srcdir}/mydns_update/
     mkdir -p "${pkgdir}/etc/"
     mkdir -p "${pkgdir}/usr/bin/"
     install -D -m600 ./mydns.conf "${pkgdir}/etc/mydns.conf"

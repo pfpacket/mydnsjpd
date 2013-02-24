@@ -24,3 +24,8 @@ post_upgrade()
         echo "New configuration file installed as /etc/mydns.conf.pacnew"
     fi
 }
+
+post_remove()
+{
+    [ -f /etc/mydns.conf.pacnew ] && rm -f /etc/mydns.conf.pacnew
+}
