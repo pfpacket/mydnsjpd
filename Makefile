@@ -3,7 +3,7 @@ CXXFLAGS   = -Wall -std=c++0x -O2
 LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include
-LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lpthread
+LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lpthread
 OBJS       = src/mydns_updater.o
 TARGET     = mydns_update
 
