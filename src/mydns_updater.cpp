@@ -163,8 +163,8 @@ public:
         ::syslog(LOG_INFO, "daemon now finished");
         ::closelog();
     }
-private:
 
+private:
     void start_service()
     {
         sigset_.async_wait(std::bind(&mydns_daemon::sighandler, this, _1, _2));
@@ -176,10 +176,12 @@ private:
     {
         if (err)
             ::syslog(LOG_ERR, "Error: timer handler: %s", err.message().c_str());
-        else {
+        else try {
             auto ret = mydns_update(opt_);
             ::syslog(std::get<1>(ret) == 200 ? LOG_NOTICE : LOG_ERR,
                 "status=%d msg=%s", std::get<1>(ret), std::get<2>(ret).c_str());
+        } catch (std::exception& e) {
+            ::syslog(LOG_ERR, "Exception: timer handler: %s", e.what());
         }
         timer_.expires_from_now(std::chrono::seconds(opt_.interval));
         timer_.async_wait(std::bind(&mydns_daemon::timer_handler, this, _1));
