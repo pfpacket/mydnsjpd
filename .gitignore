@@ -3,3 +3,6 @@ a.out
 *.conf
 !mydns.conf
 mydns_update
+pkg/mydns_updater/*.pkg.tar.xz
+pkg/mydns_updater/pkg
+pkg/mydns_updater/src

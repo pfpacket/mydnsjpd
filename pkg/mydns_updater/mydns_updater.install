@@ -1,0 +1,26 @@
+# arg 1:  the new package version
+# arg 2:  the old package version
+
+# set a sane PATH to ensure that critical utils like depmod will be found
+export PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+post_install()
+{
+    echo "mydns_update configuration file installed at /etc/mydns.conf"
+    echo "Please edit it for your configuration later"
+}
+
+pre_upgrade()
+{
+    [ -f /etc/mydns.conf ] && mv /etc/mydns.conf /etc/mydns.conf.pacnew
+}
+
+post_upgrade()
+{
+    if [ -f /etc/mydns.conf.pacnew ]; then
+        mv /etc/mydns.conf.pacnew /etc/mydns.conf.pacnew.tmp
+        mv /etc/mydns.conf /etc/mydns.conf.pacnew
+        mv /etc/mydns.conf.pacnew.tmp /etc/mydns.conf
+        echo "New configuration file installed as /etc/mydns.conf.pacnew"
+    fi
+}
