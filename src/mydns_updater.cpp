@@ -2,9 +2,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
 #include <tuple>
 #include <chrono>
 #include <functional>
@@ -58,10 +56,12 @@ void read_config_file(mydns_update_opt& opt)
     if (!ifs)
         throw std::runtime_error(opt.config_file + ": Could not open or no such file");
     for (std::string line; (std::getline(ifs, line)); ) {
-        std::istringstream iss(line);
-        std::string varname, content;
-        std::getline(iss, varname, '=');
-        std::getline(iss, content);
+        if (line.empty() || line[0] == '#')
+            continue;
+        auto equ_pos = line.find_first_of('=');
+        if (equ_pos == std::string::npos || equ_pos + 1 == line.length())
+            throw std::runtime_error(opt.config_file + ": Syntax error: \'" + line + '\'');
+        std::string varname = line.substr(0, equ_pos), content = line.substr(equ_pos + 1);
         if (varname == "USERNAME")
             opt.username = std::move(content);
         else if (varname == "PASSWORD")
@@ -70,7 +70,7 @@ void read_config_file(mydns_update_opt& opt)
             opt.interval = static_cast<unsigned int>(std::atoi(content.c_str()));
         else if (varname == "EFFECT_IMMEDIATELY")
             opt.effect_immediately = (content == "YES" || content == "yes");
-        else if (varname.empty() || varname[0] != '#')
+        else
             throw std::runtime_error(opt.config_file + ": Invalid variable \'" + varname + '\'');
     }
 }
@@ -107,14 +107,13 @@ void parse_cmd_line(int argc, char **argv, mydns_update_opt& opt)
 void base64_encode(std::string const& from, std::string& to)
 {
     using namespace boost::archive::iterators;
-    typedef base64_from_binary<transform_width<decltype(from.begin()), 6, 8 > > base64_iterator;
-    std::ostringstream oss;
+    typedef base64_from_binary<transform_width<decltype(from.begin()), 6, 8 >> base64_iterator;
+    to.clear();
     std::copy(
         base64_iterator(BOOST_MAKE_PFTO_WRAPPER(from.begin())),
         base64_iterator(BOOST_MAKE_PFTO_WRAPPER(from.end())),
-        std::ostream_iterator<char>(oss)
+        std::back_inserter(to)
     );
-    to = std::move(oss.str());
 }
 
 std::tuple<std::string, int, std::string> mydns_update(mydns_update_opt const& opt)
