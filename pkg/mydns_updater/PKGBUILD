@@ -5,7 +5,7 @@ pkgrel=2
 pkgdesc="DNS record updater for MyDNS.jp"
 arch=('i686' 'x86_64')
 license=('GPL2')
-depends=('make' 'gcc>=4.6.0')
+depends=('make' 'gcc>=4.6.0' 'git')
 install=mydns_updater.install
 source=('mydns_update.service')
 md5sums=('8e4569d81c73d4b7e8e81f981f877b96')
