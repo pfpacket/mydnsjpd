@@ -132,7 +132,8 @@ std::tuple<std::string, int, std::string> mydns_update(mydns_update_opt const& o
     if (!s)
         throw std::runtime_error("unable to send the HTTP request");
     std::string http_version, http_status, status_msg;
-    s >> http_version >> http_status >> status_msg;
+    s >> http_version >> http_status;
+    std::getline(s, status_msg);
     if (!s)
         throw std::runtime_error("unable to receive the HTTP response");
     if (opt.verbose && !opt.become_daemon)
@@ -141,7 +142,7 @@ std::tuple<std::string, int, std::string> mydns_update(mydns_update_opt const& o
             std::istreambuf_iterator<char>(),
             std::ostreambuf_iterator<char>(std::cout.rdbuf())
         );
-    return std::make_tuple(http_version, std::atoi(http_status.c_str()), status_msg);
+    return std::make_tuple(http_version, std::atoi(http_status.c_str()), status_msg.substr(1));
 }
 
 class mydns_daemon {
@@ -237,7 +238,7 @@ int main(int argc, char **argv)
             auto ret = mydns_update(opt);
             int return_code = std::get<1>(ret);
             if (return_code != 200)
-                throw std::runtime_error("Remote host returned error code, " + std::to_string(return_code));
+                throw std::runtime_error(std::to_string(return_code) + " / " + std::get<2>(ret));
             std::cout << "status=" << return_code << " msg=" << std::get<2>(ret) << std::endl;
         }
     } catch (std::exception& e) {
