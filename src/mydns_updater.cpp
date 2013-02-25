@@ -187,9 +187,10 @@ private:
 
     void timer_handler(boost::system::error_code const& err)
     {
-        if (err)
-            ::syslog(LOG_ERR, "Error: timer handler: %s", err.message().c_str());
-        else try {
+        if (err) {
+            if (!(opt_.effect_immediately && err == asio::error::operation_aborted))
+                ::syslog(LOG_ERR, "Error: timer handler: %s", err.message().c_str());
+        } else try {
             auto ret = mydns_update(opt_);
             ::syslog(std::get<1>(ret) == 200 ? LOG_NOTICE : LOG_ERR,
                 "status=%d msg=%s", std::get<1>(ret), std::get<2>(ret).c_str());
