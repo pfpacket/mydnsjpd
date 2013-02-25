@@ -27,7 +27,7 @@ enum class default_params : unsigned int {
 struct mydns_update_opt {
     std::string config_file;
     std::string username, passwd;
-    bool verbose = false, become_daemon = false;
+    bool verbose = false, become_daemon = false, effect_immediately = false;
     unsigned int interval = static_cast<unsigned int>(default_params::interval_sec);
 };
 
@@ -68,6 +68,8 @@ void read_config_file(mydns_update_opt& opt)
             opt.passwd = std::move(content);
         else if (varname == "INTERVAL")
             opt.interval = static_cast<unsigned int>(std::atoi(content.c_str()));
+        else if (varname == "EFFECT_IMMEDIATELY")
+            opt.effect_immediately = (content == "YES" || content == "yes");
         else if (varname.empty() || varname[0] != '#')
             throw std::runtime_error(opt.config_file + ": Invalid variable \'" + varname + '\'');
     }
@@ -149,7 +151,7 @@ class mydns_daemon {
 public:
     typedef asio::basic_waitable_timer<std::chrono::steady_clock> steady_timer;
     mydns_daemon(asio::io_service& io, mydns_update_opt& opt)
-        : io_(io), sigset_(io, SIGHUP, SIGINT, SIGTERM), timer_(io), opt_(opt)
+        : io_(io), timer_(io), sigset_(io, SIGHUP, SIGINT, SIGTERM), opt_(opt)
     {
         io_.notify_fork(asio::io_service::fork_prepare);
         if (::daemon(0, 0) < 0)
@@ -168,9 +170,19 @@ public:
 private:
     void start_service()
     {
-        sigset_.async_wait(std::bind(&mydns_daemon::sighandler, this, _1, _2));
+        start_timer();
+        start_signal_handling();
+    }
+
+    void start_timer()
+    {
         timer_.expires_from_now(std::chrono::seconds(opt_.interval));
         timer_.async_wait(std::bind(&mydns_daemon::timer_handler, this, _1));
+    }
+
+    void start_signal_handling()
+    {
+        sigset_.async_wait(std::bind(&mydns_daemon::sighandler, this, _1, _2));
     }
 
     void timer_handler(boost::system::error_code const& err)
@@ -184,8 +196,7 @@ private:
         } catch (std::exception& e) {
             ::syslog(LOG_ERR, "Exception: timer handler: %s", e.what());
         }
-        timer_.expires_from_now(std::chrono::seconds(opt_.interval));
-        timer_.async_wait(std::bind(&mydns_daemon::timer_handler, this, _1));
+        start_timer();
     }
 
     void sighandler(boost::system::error_code const& err, int signum)
@@ -194,6 +205,8 @@ private:
             ::syslog(LOG_ERR, "Error: signal hander: %s", err.message().c_str());
         else if (signum == SIGHUP) try {
             read_config_file(opt_);
+            if (opt_.effect_immediately)
+                timer_.cancel();
             ::syslog(LOG_INFO, "Reload config: masterID=%s,interval(sec)=%d", opt_.username.c_str(), opt_.interval);
         } catch (std::exception& e) {
             ::syslog(LOG_ERR, "Exception: signal handler: %s", e.what());
@@ -201,12 +214,12 @@ private:
             ::syslog(LOG_NOTICE, "Received SIGINT or SIGTERM, now stopping operations");
             io_.stop();
         }
-        sigset_.async_wait(std::bind(&mydns_daemon::sighandler, this, _1, _2));
+        start_signal_handling();
     }
 
     asio::io_service& io_;
-    asio::signal_set sigset_;
     steady_timer timer_;
+    asio::signal_set sigset_;
     mydns_update_opt& opt_;
 };
 
