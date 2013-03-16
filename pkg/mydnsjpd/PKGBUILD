@@ -1,6 +1,6 @@
 # Maintainer: Ryo Munakata <afpacket@gmail.com>
 pkgname=mydnsjpd
-pkgver=0.1.1
+pkgver=1.0.0
 pkgrel=2
 pkgdesc="DNS record updater for MyDNS.jp"
 arch=('i686' 'x86_64')
@@ -8,7 +8,7 @@ license=('GPL2')
 depends=('make' 'gcc>=4.6.0' 'git')
 install=mydnsjpd.install
 source=('mydnsjpd.service')
-md5sums=('8e4569d81c73d4b7e8e81f981f877b96')
+md5sums=('2d601c4a9e44e0122f4cc016332ed714')
 
 # mydnsjpd git repo
 mydnsjpd_git="https://github.com/pfpacket/mydnsjpd.git"
