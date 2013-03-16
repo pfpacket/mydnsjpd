@@ -1,8 +1,8 @@
 a.out
 *.o
 *.conf
-!mydns.conf
-mydns_update
-pkg/mydns_updater/*.pkg.tar.xz
-pkg/mydns_updater/pkg
-pkg/mydns_updater/src
+!mydnsjpd.conf
+mydnsjpd
+pkg/mydnsjpd/*.pkg.tar.xz
+pkg/mydnsjpd/pkg
+pkg/mydnsjpd/src
