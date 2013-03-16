@@ -1,6 +1,6 @@
 # Maintainer: Ryo Munakata <afpacket@gmail.com>
 pkgname=mydnsjpd
-pkgver=0.1.1
+pkgver=1.0.0
 pkgrel=2
 pkgdesc="DNS record updater for MyDNS.jp"
 arch=('i686' 'x86_64')
