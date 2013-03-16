@@ -19,7 +19,7 @@ build()
 {
     git clone "${mydns_update_git}"
     cd mydns_update/
-    make BOOST_ROOT="${boost_root}" rebuild
+    make BOOST_ROOT="${boost_root}"
 }
 
 package()
