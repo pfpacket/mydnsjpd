@@ -1,8 +1,8 @@
 #
 #       README
-#   mydns.jp updater
+#   mydnsjpd - mydns.jp updater
 #
-mydns_update is a software which updates mydns.jp DNS record.
+mydnsjpd is a software which updates mydns.jp DNS record.
 
 INSTALL:
     Just run make:
@@ -11,8 +11,13 @@ INSTALL:
         $ make BOOST_ROOT="your Boost dir"
 
 RUN:
-    $ ./mydns_update -f "your config file"
-    A template of config file (mydns.conf) exists.
+    To perform one-shot updating:
+    $ ./mydnsjpd -f "your config file"
+
+    To become a daemon:
+    $ ./mydnsjpd -df "your config file"
+
+    A template of config file (mydnsjpd.conf) exists.
 
 Requirements:
     C++11 compiler
