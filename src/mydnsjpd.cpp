@@ -22,7 +22,7 @@ enum class default_params : unsigned int {
     interval_sec = 60 * 60
 };
 
-struct mydns_update_opt {
+struct mydnsjpd_opt {
     std::string config_file;
     std::string username, passwd;
     bool verbose = false, become_daemon = false, effect_immediately = false;
@@ -50,7 +50,7 @@ void die(std::string const& prog_name, int exit_code)
 // USERNAME=user
 // PASSWORD=password
 // INTERVAL=sec
-void read_config_file(mydns_update_opt& opt)
+void read_config_file(mydnsjpd_opt& opt)
 {
     std::ifstream ifs(opt.config_file);
     if (!ifs)
@@ -75,7 +75,7 @@ void read_config_file(mydns_update_opt& opt)
     }
 }
 
-void parse_cmd_line(int argc, char **argv, mydns_update_opt& opt)
+void parse_cmd_line(int argc, char **argv, mydnsjpd_opt& opt)
 {
     for (int c; (c = ::getopt(argc, argv, "df:vh")) != -1;) {
         switch (c) {
@@ -116,7 +116,7 @@ void base64_encode(std::string const& from, std::string& to)
     );
 }
 
-std::tuple<std::string, int, std::string> mydns_update(mydns_update_opt const& opt)
+std::tuple<std::string, int, std::string> mydnsjp_update(mydnsjpd_opt const& opt)
 {
     std::string basic_auth_str;
     base64_encode(opt.username + ':' + opt.passwd, basic_auth_str);
@@ -146,10 +146,10 @@ std::tuple<std::string, int, std::string> mydns_update(mydns_update_opt const& o
     return std::make_tuple(http_version, std::atoi(http_status.c_str()), status_msg.substr(1));
 }
 
-class mydns_daemon {
+class mydnsjpd {
 public:
     typedef asio::basic_waitable_timer<std::chrono::steady_clock> steady_timer;
-    mydns_daemon(asio::io_service& io, mydns_update_opt& opt)
+    mydnsjpd(asio::io_service& io, mydnsjpd_opt& opt)
         : io_(io), timer_(io), sigset_(io, SIGHUP, SIGINT, SIGTERM), opt_(opt)
     {
         io_.notify_fork(asio::io_service::fork_prepare);
@@ -157,10 +157,10 @@ public:
             die("daemon(): " + std::string(std::strerror(errno)), EXIT_FAILURE);
         io_.notify_fork(asio::io_service::fork_child);
         start_service();
-        ::openlog("mydns_update", LOG_CONS | LOG_PID, LOG_DAEMON);
+        ::openlog("mydnsjpd", LOG_CONS | LOG_PID, LOG_DAEMON);
         ::syslog(LOG_INFO, "daemon started masterID=%s,interval(sec)=%d", opt_.username.c_str(), opt_.interval);
     }
-    ~mydns_daemon()
+    ~mydnsjpd()
     {
         ::syslog(LOG_INFO, "daemon now finished");
         ::closelog();
@@ -176,12 +176,12 @@ private:
     void start_timer()
     {
         timer_.expires_from_now(std::chrono::seconds(opt_.interval));
-        timer_.async_wait(std::bind(&mydns_daemon::timer_handler, this, _1));
+        timer_.async_wait(std::bind(&mydnsjpd::timer_handler, this, _1));
     }
 
     void start_signal_handling()
     {
-        sigset_.async_wait(std::bind(&mydns_daemon::sighandler, this, _1, _2));
+        sigset_.async_wait(std::bind(&mydnsjpd::sighandler, this, _1, _2));
     }
 
     void timer_handler(boost::system::error_code const& err)
@@ -190,7 +190,7 @@ private:
             if (!(opt_.effect_immediately && err == asio::error::operation_aborted))
                 ::syslog(LOG_ERR, "Error: timer handler: %s", err.message().c_str());
         } else try {
-            auto ret = mydns_update(opt_);
+            auto ret = mydnsjp_update(opt_);
             ::syslog(std::get<1>(ret) == 200 ? LOG_NOTICE : LOG_ERR,
                 "status=%d msg=%s", std::get<1>(ret), std::get<2>(ret).c_str());
         } catch (std::exception& e) {
@@ -220,7 +220,7 @@ private:
     asio::io_service& io_;
     steady_timer timer_;
     asio::signal_set sigset_;
-    mydns_update_opt& opt_;
+    mydnsjpd_opt& opt_;
 };
 
 void io_service_run(asio::io_service& io_service)
@@ -241,14 +241,14 @@ int main(int argc, char **argv)
     try {
         if (argc < 2)
             throw std::runtime_error("Too few arguments, use -h option to display usage");
-        mydns_update_opt opt;
+        mydnsjpd_opt opt;
         parse_cmd_line(argc, argv, opt);
         if (opt.become_daemon) {
             asio::io_service io_service;
-            mydns_daemon daemon(io_service, opt);
+            mydnsjpd daemon(io_service, opt);
             io_service_run(io_service);
         } else {
-            auto ret = mydns_update(opt);
+            auto ret = mydnsjp_update(opt);
             int return_code = std::get<1>(ret);
             if (return_code != 200)
                 throw std::runtime_error(std::to_string(return_code) + " / " + std::get<2>(ret));
