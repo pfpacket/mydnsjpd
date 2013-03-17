@@ -55,7 +55,7 @@ void read_config_file(mydnsjpd_opt& opt)
     std::ifstream ifs(opt.config_file);
     if (!ifs)
         throw std::runtime_error(opt.config_file + ": Could not open or no such file");
-    for (std::string line; (std::getline(ifs, line)); ) {
+    for (std::string line; std::getline(ifs, line); ) {
         if (line.empty() || line[0] == '#')
             continue;
         auto equ_pos = line.find_first_of('=');
