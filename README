@@ -1,6 +1,6 @@
 #
-#       README
-#   mydnsjpd - mydns.jp updater
+#           README
+#   mydnsjpd - MyDNS.jp updater
 #
 mydnsjpd is a software which updates mydns.jp DNS record.
 
@@ -12,13 +12,33 @@ INSTALL:
 
 RUN:
     To perform one-shot updating:
-    $ ./mydnsjpd -f "your config file"
+    $ mydnsjpd -f "your config file"
 
     To become a daemon:
-    $ ./mydnsjpd -df "your config file"
+    $ mydnsjpd -df "your config file"
 
-    A template of config file (mydnsjpd.conf) exists.
+    To re-load the specified config file:
+    $ kill -SIGHUP ${MYDNSJPD_PID}
+    (In the case mydnsjpd is running as a daemon)
 
-Requirements:
-    C++11 compiler
-    Boost C++ libraries
+CONFIGURATION:
+    Option -f allows to specify config file.
+    The possible variables which can be used in a config file are:
+        USERNAME:
+            MyDNS.jp master ID
+        PASSWORD:
+            MyDNS.jp password
+        INTERVAL:
+            Interval seconds between each updating
+            The default value is 3600 seconds
+        EFFECT_IMMEDIATELY:
+            If the new configuration is effective immediately when SIGHUP is received
+            Possible values:
+                'YES' or 'yes': True
+                others: false
+
+    There is mydnsjpd.conf, a template of config file.
+
+REQUIREMENTS:
+    C++11 compiler (compile-time)
+    Boost C++ libraries (compile-time and runtime)
