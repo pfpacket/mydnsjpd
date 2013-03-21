@@ -22,6 +22,7 @@ enum class default_params : unsigned int {
     interval_sec = 60 * 60
 };
 
+// mydnsjpd option structure
 struct mydnsjpd_opt {
     std::string config_file;
     std::string username, passwd;
@@ -116,6 +117,7 @@ void base64_encode(std::string const& from, std::string& to)
     );
 }
 
+// mydnsjpd core updating function
 std::tuple<std::string, int, std::string> mydnsjp_update(mydnsjpd_opt const& opt)
 {
     std::string basic_auth_str;
@@ -146,6 +148,9 @@ std::tuple<std::string, int, std::string> mydnsjp_update(mydnsjpd_opt const& opt
     return std::make_tuple(http_version, std::atoi(http_status.c_str()), status_msg.substr(1));
 }
 
+//
+// mydnsjpd core daemon class
+//
 class mydnsjpd {
 public:
     typedef asio::basic_waitable_timer<std::chrono::steady_clock> steady_timer;
@@ -223,6 +228,7 @@ private:
     mydnsjpd_opt& opt_;
 };
 
+// Do io_service::run() properly including exception handling
 void io_service_run(asio::io_service& io_service)
 {
     for (;;) {
@@ -231,6 +237,9 @@ void io_service_run(asio::io_service& io_service)
             break;
         } catch (std::exception& e) {
             ::syslog(LOG_ERR, "Exception: catched by io_service_run(): %s", e.what());
+        } catch (...) {
+            ::syslog(LOG_ERR, "FATAL error: unknown exception cathced, exiting...");
+            break;
         }
     }
 }
@@ -243,11 +252,14 @@ int main(int argc, char **argv)
             throw std::runtime_error("Too few arguments, use -h option to display usage");
         mydnsjpd_opt opt;
         parse_cmd_line(argc, argv, opt);
+
         if (opt.become_daemon) {
+            // Now we are becoming a daemon
             asio::io_service io_service;
             mydnsjpd daemon(io_service, opt);
             io_service_run(io_service);
         } else {
+            // Or perform one-shot updating
             auto ret = mydnsjp_update(opt);
             int return_code = std::get<1>(ret);
             if (return_code != 200)
