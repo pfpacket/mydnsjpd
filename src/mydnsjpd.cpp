@@ -196,7 +196,7 @@ private:
                 ::syslog(LOG_ERR, "Error: timer handler: %s", err.message().c_str());
         } else try {
             auto ret = mydnsjp_update(opt_);
-            ::syslog(std::get<1>(ret) == 200 ? LOG_NOTICE : LOG_ERR,
+            ::syslog(std::get<1>(ret) == 200 ? LOG_INFO : LOG_ERR,
                 "status=%d msg=%s", std::get<1>(ret), std::get<2>(ret).c_str());
         } catch (std::exception& e) {
             ::syslog(LOG_ERR, "Exception: timer handler: %s", e.what());
