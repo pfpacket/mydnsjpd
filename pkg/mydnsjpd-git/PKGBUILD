@@ -10,6 +10,7 @@ license=('GPL2')
 depends=('gcc>=4.6.0' 'boost-libs')
 makedepends=('git' 'boost')
 provides=('mydnsjpd')
+backup=('etc/mydnsjpd.conf')
 install=mydnsjpd.install
 source=('mydnsjpd.service')
 md5sums=('2d601c4a9e44e0122f4cc016332ed714')
