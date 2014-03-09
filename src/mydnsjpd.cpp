@@ -68,7 +68,7 @@ void read_config_file(mydnsjpd_opt& opt)
         else if (varname == "PASSWORD")
             opt.passwd = std::move(content);
         else if (varname == "INTERVAL")
-            opt.interval = static_cast<unsigned int>(std::atoi(content.c_str()));
+            opt.interval = static_cast<unsigned int>(std::stoi(content));
         else if (varname == "EFFECT_IMMEDIATELY")
             opt.effect_immediately = (content == "YES" || content == "yes");
         else
