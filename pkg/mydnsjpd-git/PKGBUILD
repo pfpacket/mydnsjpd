@@ -6,7 +6,7 @@ pkgrel=1
 pkgdesc="DNS record updater for MyDNS.jp"
 arch=('i686' 'x86_64')
 url="https://github.com/pfpacket/mydnsjpd"
-license=('GPL2')
+license=('BSD')
 depends=('gcc>=4.6.0' 'boost-libs')
 makedepends=('boost')
 provides=('mydnsjpd')
