@@ -3,7 +3,7 @@ a.out
 *.conf
 !mydnsjpd.conf
 mydnsjpd
-pkg/mydnsjpd-git/*.pkg.tar.xz
-pkg/mydnsjpd-git/*.src.tar.gz
+pkg/mydnsjpd-git/*.pkg.tar*
+pkg/mydnsjpd-git/*.src.tar*
 pkg/mydnsjpd-git/pkg/
 pkg/mydnsjpd-git/src/

@@ -42,3 +42,6 @@ CONFIGURATION:
 REQUIREMENTS:
     C++11 compiler (compile-time)
     Boost C++ libraries (compile-time and runtime)
+
+License:
+    mydnsjpd is licensed under The BSD 2-Clause License.
